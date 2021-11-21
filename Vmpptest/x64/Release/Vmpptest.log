@@ -1,8 +1,0 @@
-﻿  Vmpptest.cpp
-D:\vs-code\VmpUnpack\Vmpptest\Vmpptest\Vmpptest.cpp(20,12): warning C4477: “printf”: 格式字符串“%llx”需要类型“unsigned __int64”的参数，但可变参数 1 拥有了类型“ULONG64 *”
-  正在生成代码
-  1 of 4 functions (25.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
-  已完成代码的生成
-  Vmpptest.vcxproj -> D:\vs-code\VmpUnpack\Vmpptest\x64\Release\Vmpptest.exe

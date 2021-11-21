@@ -1,2 +1,0 @@
-^D:\VS-CODE\VMPUNPACK\VMPPTEST\VMPPTEST\X64.ASM
-ml64 /Fo x64\Release\x64.obj /c x64.asm
