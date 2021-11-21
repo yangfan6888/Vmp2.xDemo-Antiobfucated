@@ -29,5 +29,9 @@ inline uint64_t* vmp_dispatch_table = (uint64_t*)0x14000644B;
 //在x64.asm中实现的函数
 extern "C"
 {
+	//
+	//2021.11.22
+	//此函数废弃，不要使用
+	//
 	uint8_t decrypt_opcode(uint64_t vRip);
 }

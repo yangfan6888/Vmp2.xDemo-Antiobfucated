@@ -3,12 +3,16 @@
 .CODE
 
 
+;
+;
+;从opcode解密到索引
+;
 decrypt_opcode PROC
 	push rsi
 	push rbx
 	
 	mov rsi,rcx
-	mov rbx,rsi
+	mov rbx,rcx
 	mov al,[rsi-1]
 	xor al,bl
 	inc al

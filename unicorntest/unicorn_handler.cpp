@@ -93,7 +93,7 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     //指定地址测试
     //
 #if 0
-    if (address == 0x140001354)
+    if (address == 0x140008998)
     {
         DebugBreak();
     }
@@ -103,25 +103,30 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     //匹配 0x14001ff6d "mov     al, [rsi-1]"
     //这个地点是vmp循环读取opcode，然后解密opcode的地方
     //
-#if 1
+#if 0
     if ((gpcs_ins->detail->x86.operands[0].type == X86_OP_REG)&& 
         (gpcs_ins->detail->x86.operands[0].reg == X86_REG_AL)&& 
         !_stricmp(gpcs_ins->mnemonic,"mov")&&
         (gpcs_ins->detail->x86.operands[1].mem.base == X86_REG_RSI))
     {
         printf("vRip = %llx\n", emu_ctx.Rsi);
-
-        uint8_t op = decrypt_opcode(emu_ctx.Rsi);
-        //printf("%x\n", op);
-
-        auto disp_des = vmp_dispatch_table[op];
-        printf("vmp dispatch handler at %llx\n", --disp_des);
-
-
-        uc_emu_stop(uc);     
+        //uc_emu_stop(uc);     
     }
 #endif
 
+    //
+    //精确匹配MOV RDX, QWORD PTR DS:[R12+RAX*8]，寻找此次的dispatch hanlder
+    //
+    if ((gpcs_ins->detail->x86.operands[0].type == X86_OP_REG) &&
+        (gpcs_ins->detail->x86.operands[0].reg == X86_REG_RDX) &&
+        (gpcs_ins->detail->x86.operands[1].mem.base == X86_REG_R12)&&
+        (gpcs_ins->detail->x86.operands[1].mem.index == X86_REG_RAX)&&
+        (gpcs_ins->detail->x86.operands[1].mem.scale == 8))
+    {
+        uint64_t disp = 0;
+        uc_mem_read(uc,emu_ctx.R12 + emu_ctx.Rax * 8, &disp, 8);
+        printf("vRip = %llx Dispatch Handler = %llx\n", emu_ctx.Rsi, disp);
+    }
 
 
 
