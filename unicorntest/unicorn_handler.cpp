@@ -34,10 +34,20 @@ void hook_mem64(uc_engine* uc, uc_mem_type type,
 
     case UC_MEM_WRITE_UNMAPPED:
         cout << "[FATAL ERROR]MEM WRITE UNMAPPED at address 0x" << address << endl;
+#if 1
+        uc_reg_read(uc, X86_REG_RIP, &emu_ctx.Rip);
+        cs_disasm(cs, (uint8_t*)emu_ctx.Rip, 15, (uint64_t)0, 0, &gpcs_ins);
+        cout << hex << emu_ctx.Rip << " : " << gpcs_ins->mnemonic << "  " << gpcs_ins->op_str << endl;
+#endif
         break;
 
     case UC_MEM_READ_UNMAPPED:
         cout << "[FATAL ERROR]MEM READ UNMAPPED at address 0x" << address << endl;
+#if 1
+        uc_reg_read(uc, X86_REG_RIP, &emu_ctx.Rip);
+        cs_disasm(cs, (uint8_t*)emu_ctx.Rip, 15, (uint64_t)0, 0, &gpcs_ins);
+        cout << hex << emu_ctx.Rip << " : " << gpcs_ins->mnemonic << "  " << gpcs_ins->op_str << endl;
+#endif
         break;
     case UC_MEM_FETCH_UNMAPPED:
         /*
@@ -49,7 +59,7 @@ void hook_mem64(uc_engine* uc, uc_mem_type type,
 #if 1
         uc_reg_read(uc, X86_REG_RIP, &emu_ctx.Rip);
         cs_disasm(cs, (uint8_t*)emu_ctx.Rip, 15, (uint64_t)0, 0, &gpcs_ins);
-        cout << hex << address << " : " << gpcs_ins->mnemonic << "  " << gpcs_ins->op_str << endl;
+        cout << hex << emu_ctx.Rip << " : " << gpcs_ins->mnemonic << "  " << gpcs_ins->op_str << endl;
 #endif
         break;
     }
@@ -103,7 +113,7 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     //匹配 0x14001ff6d "mov     al, [rsi-1]"
     //这个地点是vmp循环读取opcode，然后解密opcode的地方
     //
-#if 0
+#if 0 //vmp2
     if ((gpcs_ins->detail->x86.operands[0].type == X86_OP_REG)&& 
         (gpcs_ins->detail->x86.operands[0].reg == X86_REG_AL)&& 
         !_stricmp(gpcs_ins->mnemonic,"mov")&&
@@ -114,6 +124,7 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     }
 #endif
 
+#if 0 //vmp2
     //
     //精确匹配MOV RDX, QWORD PTR DS:[R12+RAX*8]，寻找此次的dispatch hanlder
     //
@@ -125,8 +136,24 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     {
         uint64_t disp = 0;
         uc_mem_read(uc,emu_ctx.R12 + emu_ctx.Rax * 8, &disp, 8);
-        printf("vRip = %llx Dispatch Handler = %llx\n", emu_ctx.Rsi, disp);
+        printf("vRip = %llx Opcode(Index) = %llx RegIndex = %llx Dispatch Handler = %llx\n", 
+            emu_ctx.Rsi, 
+            emu_ctx.Rax,
+            (emu_ctx.Rax),
+            de_dispatch_handler(disp));
     }
+#endif
+
+    if (address == 0x1401CECE6)
+    {
+        printf("disp handler = %llx\n", emu_ctx.Rdi);
+    }
+
+
+
+
+
+
 
 
 

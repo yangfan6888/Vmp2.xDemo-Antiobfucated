@@ -11,16 +11,16 @@ using namespace std;
 uc_engine* uc;
 csh cs;
 
-uint64_t InitRax = 0x14001E03C;
+uint64_t InitRax = 0x00000001401BC77A;
 uint64_t InitRbx = 0;
-uint64_t InitRcx = 0x319000;
-uint64_t InitRdx = 0x140001350;
+uint64_t InitRcx = 0x00000000002DC000;
+uint64_t InitRdx = 0x00000001401BC77A;
 uint64_t InitRbp = 0;
-uint64_t InitRsp = 0x14FF28;
+uint64_t InitRsp = 0x000000000014FF28;
 uint64_t InitRsi = 0;
 uint64_t InitRdi = 0;
-uint64_t InitR8 = 0x319000;
-uint64_t InitR9 = 0x140001350;
+uint64_t InitR8 = 0x00000000002DC000;
+uint64_t InitR9 = 0x00000001401BC77A;
 uint64_t InitR10 = 0;
 uint64_t InitR11 = 0;
 uint64_t InitR12 = 0;
@@ -120,7 +120,7 @@ int main()
     uc_hook_add(uc, &trace1, UC_HOOK_CODE, hook_code, NULL, 1, 0);
 
     
-    err = uc_emu_start(uc, /*(uint64_t)map_base + entry_point*/0x140001073, (uint64_t)0xffff7fffffffffff, 0, 0);
+    err = uc_emu_start(uc, /*(uint64_t)map_base + entry_point*/0x1401BC77A, (uint64_t)0xffff7fffffffffff, 0, 0);
     if (err) {
         printf("Failed on uc_emu_start() with error returned %u: %s\n",err, uc_strerror(err));
         return -1;

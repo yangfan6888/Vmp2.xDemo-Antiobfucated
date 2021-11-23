@@ -34,4 +34,16 @@ extern "C"
 	//此函数废弃，不要使用
 	//
 	uint8_t decrypt_opcode(uint64_t vRip);
+	
+	//
+	//有些handle进入的时候会对opcode运算，然后获得在虚拟栈上的索引，并赋值
+	//
+	uint8_t opcode_to_reg_index(uint8_t opcode);
+
+
 }
+
+//
+//vmp2.13注册版对dispatch handler的解密运算
+//
+uint64_t de_dispatch_handler(uint64_t disp);

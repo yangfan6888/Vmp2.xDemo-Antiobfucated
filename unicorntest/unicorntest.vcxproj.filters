@@ -30,6 +30,9 @@
     <ClCompile Include="vmp2.cpp">
       <Filter>vmp</Filter>
     </ClCompile>
+    <ClCompile Include="vmp3.cpp">
+      <Filter>vmp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="global.h">
@@ -39,6 +42,9 @@
       <Filter>unicorn_handler</Filter>
     </ClInclude>
     <ClInclude Include="vmp2.h">
+      <Filter>vmp</Filter>
+    </ClInclude>
+    <ClInclude Include="vmp3.h">
       <Filter>vmp</Filter>
     </ClInclude>
   </ItemGroup>

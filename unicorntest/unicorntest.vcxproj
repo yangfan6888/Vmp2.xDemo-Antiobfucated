@@ -145,11 +145,13 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="unicorn_handler.cpp" />
     <ClCompile Include="vmp2.cpp" />
+    <ClCompile Include="vmp3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="global.h" />
     <ClInclude Include="unicorn_handler.h" />
     <ClInclude Include="vmp2.h" />
+    <ClInclude Include="vmp3.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="x64.asm">

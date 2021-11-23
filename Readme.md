@@ -1,1 +1,1 @@
-Some VMProtect Research
+VMProtect Research
