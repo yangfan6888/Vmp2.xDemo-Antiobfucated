@@ -124,7 +124,7 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     }
 #endif
 
-#if 0 //vmp2
+#if 1 //vmp2
     //
     //精确匹配MOV RDX, QWORD PTR DS:[R12+RAX*8]，寻找此次的dispatch hanlder
     //
@@ -136,18 +136,12 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     {
         uint64_t disp = 0;
         uc_mem_read(uc,emu_ctx.R12 + emu_ctx.Rax * 8, &disp, 8);
-        printf("vRip = %llx Opcode(Index) = %llx RegIndex = %llx Dispatch Handler = %llx\n", 
+        printf("vRip = %llx Opcode(Index) = %llx Dispatch Handler = %llx\n", 
             emu_ctx.Rsi, 
             emu_ctx.Rax,
-            (emu_ctx.Rax),
             de_dispatch_handler(disp));
     }
 #endif
-
-    if (address == 0x1401CECE6)
-    {
-        printf("disp handler = %llx\n", emu_ctx.Rdi);
-    }
 
 
 

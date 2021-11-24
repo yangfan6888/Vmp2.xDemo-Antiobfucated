@@ -11,18 +11,18 @@ using namespace std;
 uc_engine* uc;
 csh cs;
 
-uint64_t InitRax = 0x00000001401BC77A;
-uint64_t InitRbx = 0;
-uint64_t InitRcx = 0x00000000002DC000;
+uint64_t InitRax = 0x0000000000000012;
+uint64_t InitRbx = 0x0000000000487840;
+uint64_t InitRcx = 0x00000000FFFFFFFF;
 uint64_t InitRdx = 0x00000001401BC77A;
 uint64_t InitRbp = 0;
-uint64_t InitRsp = 0x000000000014FF28;
+uint64_t InitRsp = 0x000000000014FEC0;
 uint64_t InitRsi = 0;
-uint64_t InitRdi = 0;
-uint64_t InitR8 = 0x00000000002DC000;
+uint64_t InitRdi = 0x0000000000481330;
+uint64_t InitR8 = 0x0000000000000002;
 uint64_t InitR9 = 0x00000001401BC77A;
-uint64_t InitR10 = 0;
-uint64_t InitR11 = 0;
+uint64_t InitR10 = 1;
+uint64_t InitR11 = 0x000000000014FDC0;
 uint64_t InitR12 = 0;
 uint64_t InitR13 = 0;
 uint64_t InitR14 = 0;
@@ -120,7 +120,7 @@ int main()
     uc_hook_add(uc, &trace1, UC_HOOK_CODE, hook_code, NULL, 1, 0);
 
     
-    err = uc_emu_start(uc, /*(uint64_t)map_base + entry_point*/0x1401BC77A, (uint64_t)0xffff7fffffffffff, 0, 0);
+    err = uc_emu_start(uc, /*(uint64_t)map_base + entry_point*/0x140001073, (uint64_t)0xffff7fffffffffff, 0, 0);
     if (err) {
         printf("Failed on uc_emu_start() with error returned %u: %s\n",err, uc_strerror(err));
         return -1;

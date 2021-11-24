@@ -8,7 +8,7 @@
 //我们要分析的文件名，放在该文件目录下
 //
 inline const char* packed_file = "vmp2/Vmpptest.vmp.exe";
-inline const wchar_t* wpacked_file = L"vmp3/Vmpptest.vmp3.0.9rg.exe";
+inline const wchar_t* wpacked_file = L"vmp2/Vmpptest.vmp2.12register.exe";
 
 //
 //这个宏的作用是将实际的va转化为以LoadLibrary为基址的va
