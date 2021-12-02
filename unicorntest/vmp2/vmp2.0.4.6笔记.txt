@@ -888,3 +888,5 @@ vRip = 140008ae2 Opcode(Index) = 21 RegIndex = 21 Dispatch Handler = 140007b7f
 vRip = 140008ae0 Opcode(Index) = 21 RegIndex = 21 Dispatch Handler = 140007b7f
 vRip = 140008ade Opcode(Index) = 21 RegIndex = 21 Dispatch Handler = 140007b7f
 vRip = 140008adc Opcode(Index) = 5d RegIndex = 5d Dispatch Handler = 14000778b
+
+第一部其实是要解决deadstore问题，也就是垃圾代码的问题，这部分人工是可以很轻易的识别出来的，但是工作量太大，肯定不能人工搞。

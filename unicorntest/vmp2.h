@@ -15,26 +15,91 @@ opcode stream :1 2 3 4 5 6 7 8 end
 /*
 * 
 rsi = vRip
-
+rdi = vStack or vContext
 
 */
 
-inline char opcode;
+class vm
+{
+public:
+	vm() = default;
 
-//
-//.vmp0:0000000140008900                 lea     r12, vmp_dispatch_handler_table
-//
-inline uint64_t* vmp_dispatch_table = (uint64_t*)0x14000644B;
+	static vm* get_instance() {
+		if (!m_instance)
+			m_instance = new vm;
+		return m_instance;
+	}
+
+	static vm* m_instance;
+
+	//
+	//vrsp(物理寄存器RBP)
+	//
+	const uint64_t vrsp_limit_low = 0x14FE10;
+	const uint64_t vrsp_limit_high = 0x14FEB8;
+	
+	uint64_t vrsp;//虚拟机的栈  
+
+
+
+	
+	//
+	//0x14FE10 - 0x14FCD0 = 0x28(40)
+	//vmp2最多28个虚拟寄存器
+	//
+	uint64_t vReg[0x28]{};
+	
+	//
+	//		mov     rdx, [rbp+0]
+	//		add     rbp, 8
+	// 	    mov     [rax+rdi], rdx
+	//	    这条指令占1个字节
+	void vpop(uint64_t offset);
+
+	//
+	//		mov     rsp, rbp
+	//      pop		rax
+	//		pop		rdx
+	// 	    pop		r12
+	// 		pop     ...
+	//		占1个字节，把堆栈上的寄存器全都还原到物理寄存器上，然后虚拟机退出
+	void vpop_to_physical_reg();
+
+	//
+	void vpush(uint64_t offset);
+
+	//
+	// 	    mov     eax, [rsi-4]
+	//      xxxxxx解密eax
+	//      xor     [rsp], eax  这个是干嘛的？
+	//      sub     rbp, 8
+	// 	    mov     [rbp+0], rax
+	// 
+	//	    这条指令占5个字节(rsi->rsi-4)
+	void vpushImm(uint32_t imm);
+
+
+// 
+//	    这条指令占9个字节(rsi->rsi-8)
+	void vpushImm(uint64_t imm);
+
+	//
+	//      mov     rax, [rbp+0]
+	//      add     [rbp+8], rax
+	//      pushfq
+	// 	    pop     qword ptr [rbp+0]
+	//      占一个字节，将栈顶和栈顶下一个数相加放在栈顶下一位，栈顶放rflags
+	void vadd();
+
+
+
+};
+
+inline vm* vm::m_instance = nullptr;
 
 //在x64.asm中实现的函数
 extern "C"
 {
-	//
-	//2021.11.22
-	//此函数废弃，不要使用
-	//
-	uint8_t decrypt_opcode(uint64_t vRip);
-	
 	//
 	//有些handle进入的时候会对opcode运算，然后获得在虚拟栈上的索引，并赋值
 	//
@@ -42,8 +107,3 @@ extern "C"
 
 
 }
-
-//
-//vmp2.13注册版对dispatch handler的解密运算
-//
-uint64_t de_dispatch_handler(uint64_t disp);

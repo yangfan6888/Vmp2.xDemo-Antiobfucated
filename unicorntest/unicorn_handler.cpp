@@ -55,12 +55,15 @@ void hook_mem64(uc_engine* uc, uc_mem_type type,
           1.执行到API调用，访问到其他dll里面去
           2.
         */
-        cout << "[FATAL ERROR]MEM FETCH UNMAPPED at address 0x" << address << endl;
+        //cout << "[FATAL ERROR]MEM FETCH UNMAPPED at address 0x" << address << endl;
 #if 1
         uc_reg_read(uc, X86_REG_RIP, &emu_ctx.Rip);
-        cs_disasm(cs, (uint8_t*)emu_ctx.Rip, 15, (uint64_t)0, 0, &gpcs_ins);
+    
+        //在执行到出问题的指令前，已经对那条指令了
         cout << hex << emu_ctx.Rip << " : " << gpcs_ins->mnemonic << "  " << gpcs_ins->op_str << endl;
 #endif
+
+        uc_emu_stop(uc);
         break;
     }
 }
@@ -88,10 +91,13 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     uc_reg_read(uc, X86_REG_R14, &emu_ctx.R14);
     uc_reg_read(uc, X86_REG_R15, &emu_ctx.R15);
 
+    //dispatch handler的目的地
+    static uint64_t disp = 0;
+
     //
     //x86一般最长一条指令15字节
     //
-    
+    //对当前指令做反汇编，备用gpcs_ins
     cs_disasm(cs, (uint8_t*)address, 15, (uint64_t)0, 0, &gpcs_ins);
 
 
@@ -124,33 +130,70 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
     }
 #endif
 
+
 #if 1 //vmp2
     //
     //精确匹配MOV RDX, QWORD PTR DS:[R12+RAX*8]，寻找此次的dispatch hanlder
     //
     if ((gpcs_ins->detail->x86.operands[0].type == X86_OP_REG) &&
         (gpcs_ins->detail->x86.operands[0].reg == X86_REG_RDX) &&
-        (gpcs_ins->detail->x86.operands[1].mem.base == X86_REG_R12)&&
-        (gpcs_ins->detail->x86.operands[1].mem.index == X86_REG_RAX)&&
+        (gpcs_ins->detail->x86.operands[1].mem.base == X86_REG_R12) &&
+        (gpcs_ins->detail->x86.operands[1].mem.index == X86_REG_RAX) &&
         (gpcs_ins->detail->x86.operands[1].mem.scale == 8))
     {
-        uint64_t disp = 0;
-        uc_mem_read(uc,emu_ctx.R12 + emu_ctx.Rax * 8, &disp, 8);
-        printf("vRip = %llx Opcode(Index) = %llx Dispatch Handler = %llx\n", 
-            emu_ctx.Rsi, 
+
+        uc_mem_read(uc, emu_ctx.R12 + emu_ctx.Rax * 8, &disp, 8);
+#if 0
+        printf(
+            "vRip = %llx Opcode(Index) = %llx Dispatch Handler = %llx\n",
+            emu_ctx.Rsi,
             emu_ctx.Rax,
-            de_dispatch_handler(disp));
-    }
+            disp);
+
+#endif
+
+        //
+        //匹配每次handler
+        //
+        if (0x1400074fc == disp - 1)
+        {
+            vm::get_instance()->vpop(opcode_to_reg_index(emu_ctx.Rax));
+        }
+        else if (0x1400072b1 == disp - 1)
+        {
+            vm::get_instance()->vpushImm((uint32_t)0);
+        }
+        else if (0x140007eb1 == disp - 1)
+        {
+            vm::get_instance()->vadd();
+        }
+        else if (0x140009589 == disp - 1)
+        {
+            vm::get_instance()->vpushImm((uint64_t)0);
+        }
+        else if (0x1400077c3 == disp - 1)
+        {
+            vm::get_instance()->vpush(opcode_to_reg_index(emu_ctx.Rax));
+        }
+        else if (0x14000784F == disp - 1)
+        {
+            vm::get_instance()->vpop_to_physical_reg();
+            uc_emu_stop(uc);
+        }
+        else {            //如果匹配到了vmp2的dispatch handler，但是并没有处理
+            DebugBreak();
+        }
+
+
 #endif
 
 
 
+    }
 
 
 
 
 
-
-
-
+    
 }
