@@ -178,7 +178,7 @@ void hook_code(uc_engine* uc, uint64_t address, uint32_t size, void* user_data)
         else if (0x14000784F == disp - 1)
         {
             vm::get_instance()->vpop_to_physical_reg();
-            uc_emu_stop(uc);
+            //uc_emu_stop(uc);
         }
         else {            //如果匹配到了vmp2的dispatch handler，但是并没有处理
             DebugBreak();

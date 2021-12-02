@@ -6,10 +6,10 @@ xxxxxxxxxx14FCD0            			RDI指向这里，MOV QWORD PTR DS:[RAX+RDI*1], R
 
 
 
-000000000014FE10   000030AA3557757A       
-000000000014FE18   0000000000000000     RBP指向这里(现在看来应该是vmp的虚拟栈的栈顶,退出VM的时候从这里pop到真实寄存器)
-000000000014FE20   qword_140006D0C0     (0x140009443指令地址push的一个常数)  
-000000000014FE28   0000000000000000     R12  //这下面是退出VM的handler执行准备给真实寄存器的值（VM_CONTEXT）
+000000000014FE10   000030AA3557757A             //不知道干嘛的  
+000000000014FE18   0000000000000000     (RAX?)     	//RBP指向这里(现在看来应该是vmp的虚拟栈的栈顶,退出VM的时候从这里pop到真实寄存器)
+000000000014FE20   qword_140006D0C0     (RDX?)(0x140009443指令地址push的一个常数)  
+000000000014FE28   0000000000000000     R12     //这下面是退出VM的handler执行准备给真实寄存器的值（VM_CONTEXT）
 000000000014FE30   0000000000000000     R9
 000000000014FE38   0000000000000000     R15  
 000000000014FE40   000000000014FDC0     R11
@@ -18,7 +18,7 @@ xxxxxxxxxx14FCD0            			RDI指向这里，MOV QWORD PTR DS:[RAX+RDI*1], R
 000000000014FE58   0       				RBP
 000000000014FE60   2					R14       
 000000000014FE68   0000000000000000     R8
-000000000014FE70   0000000000000000		RBP       
+000000000014FE70   0000000000000000		RBP （RSI）     
 000000000014FE78   0					RSI  
 000000000014FE80   00000000005E13C0     RDI 
 000000000014FE88   0000000000000000     R13          
@@ -26,7 +26,7 @@ xxxxxxxxxx14FCD0            			RDI指向这里，MOV QWORD PTR DS:[RAX+RDI*1], R
 000000000014FE98   1					R10       
 000000000014FEA0   12					RAX       
 000000000014FEA8   206 					RFLAGS     
-000000000014FEB0   0xFFFFFFFFCF3E4503   这个地方是虚拟机退出，然后要执行的rip，可以从1400078E4这里看出来。
+000000000014FEB0   0xFFFFFFFFCF3E4503   RIP    //(这个地方是虚拟机退出，然后要执行的rip(RET弹出)，可以从1400078E4这里看出来)。
 000000000014FEB8   0000000062340CC6    （key）      
 
 
@@ -62,8 +62,8 @@ RSI在14000A68E的时候触发我们的硬件断点，也就是这个handler会�
 
 
 程序运行的部分handler表
-vRip = 14000a6e1 Opcode(Index) = ac RegIndex = 30 Dispatch Handler = 1400074fc
-vRip = 14000a6e0 Opcode(Index) = 3b RegIndex = c0 Dispatch Handler = 1400072b1
+vRip = 14000a6e1 Opcode(Index) = ac RegIndex = 30 Dispatch Handler = 1400074fc    
+vRip = 14000a6e0 Opcode(Index) = 3b RegIndex = c0 Dispatch Handler = 1400072b1	
 vRip = 14000a6db Opcode(Index) = 67 RegIndex = e8 Dispatch Handler = 140007eb1
 vRip = 14000a6da Opcode(Index) = fc RegIndex = 80 Dispatch Handler = 1400074fc
 vRip = 14000a6d9 Opcode(Index) = 94 RegIndex = 18 Dispatch Handler = 1400074fc
@@ -177,7 +177,7 @@ and al,0F8h
 而且最后还有mov     [rax+rdi], rdx这个操作，rdi肯定是VM的栈了
 难道是利用opcode，做运算可以算出虚拟栈中的寄存器地址，赋值？
 
-要注意handler是不可能对真实寄存器操作的(计算中转，总不可能拿内存做中转，效率太低了)，所有对寄存器的操作最后转化为对vitual context的操作，也就是类似
+要注意handler是不可能对真实寄存器操作的(cpu计算总得拿虚拟寄存器做中转吧，总不可能拿内存做中转，效率太低了)，所有对寄存器的操作最后转化为对vitual context的操作，也就是类似
 mov [RBP+xx],xx
 
 
@@ -890,3 +890,12 @@ vRip = 140008ade Opcode(Index) = 21 RegIndex = 21 Dispatch Handler = 140007b7f
 vRip = 140008adc Opcode(Index) = 5d RegIndex = 5d Dispatch Handler = 14000778b
 
 第一部其实是要解决deadstore问题，也就是垃圾代码的问题，这部分人工是可以很轻易的识别出来的，但是工作量太大，肯定不能人工搞。
+
+将vm执行流程打印出来，可以得到两个vm退出的rip，1400010b0 14000108b
+
+在vm开始的地方，jmp到1400010b0然后继续jmp到14000108b如何？
+
+															  mov     rcx,0x140003638
+0000000140001073                | 48:B8 8B10004001000000    | MOV     RAX, tmp2.14000108B                   |
+000000014000107D                | 50                        | PUSH    RAX                                   |
+000000014000107E                | EB 30                     | JMP     tmp2.1400010B0                        |

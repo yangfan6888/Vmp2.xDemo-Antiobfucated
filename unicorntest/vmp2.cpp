@@ -1,9 +1,12 @@
+#include"include/unicorn/unicorn.h"
 #include"vmp2.h"
 #include<intrin.h>
 #include<assert.h>
 #include"global.h"
 
 #include<unordered_map>
+
+extern uc_engine* uc;
 
 std::unordered_map<uint32_t, const char*> umap
 {
@@ -21,21 +24,36 @@ void vm::vpop(uint64_t offset)
 	
 	//换成十进制方便看
 	std::cout << std::dec;
-	std::cout << "vPop vR" << offset / 8;
+	std::cout << "vPop vR" << offset / 8 << std::endl;
 	std::cout << std::hex;
-	const auto it = umap.find(emu_ctx.Rbp);
-	if (it == umap.cend())
-		DebugBreak();//rbp不合法
-	std::cout << " <-> " << it->second << std::endl;
 }
 
 void vm::vpop_to_physical_reg()
 {
-	std::cout << "pop all virtual regs to physical regs(vm exited)\n";
+	vmp_stack* vs = nullptr;
+	uint64_t rip = -1;
+
+	std::cout << "pop all virtual regs to physical regs(vm exited) ";
+
+	vs = (decltype(vs))emu_ctx.Rbp;
+	uc_mem_read(uc, (uint64_t) & (vs->RIP), &rip, sizeof(void*));
+
+	std::cout << "Physical RIP " << rip << std::endl;
+
+	//
+	//根据我们的rip指向的代码需要什么寄存器，恢复代码的时候也要把需要的恢复
+	//第一次的rip只需要恢复RCX
+	//
+	uc_mem_read(uc, (uint64_t) & (vs->RCX), &rip, sizeof(void*));
+	std::cout << "Physical RCX " << rip << std::endl;
+
 }
 
 void vm::vpush(uint64_t offset)
 {
+	assert(!(offset % 8));
+
+	//换成十进制方便看
 	std::cout << std::dec;
 	std::cout << "vPush vR" << offset / 8 << std::endl;
 	std::cout << std::hex;
